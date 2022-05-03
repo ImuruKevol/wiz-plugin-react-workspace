@@ -1,50 +1,19 @@
-div(style="width: 100%; height: 100%;")
-    mixin editor_fastmenu()
-        input.form-control.mr-2.text-white.if-desktop(type="text" ng-model="app.data.package.title" style="width: 160px; display: inline-block;" autocomplete='off')
-        input.form-control.mr-2.text-white.if-desktop(type="text" ng-model="app.data.package.namespace" style="width: 240px; display: inline-block;" autocomplete='off')
-
+#react-workspace-apps-editor.container(style="width: 100vw; height: 100vh;")
     mixin editor_tab_app()
         .card.card-sm.mb-3
             .card-body
-                label.form-label(style="font-family: 'MAIN-EB'") Title
-                input.form-control(type='text' placeholder='App Title' ng-model="app.data.package.title" autocomplete='off')
-
+                label.form-label(style="font-family: 'MAIN-EB'") View
+                select.form-select(ng-model="app.data.package.viewcomponent")
+                    option(ng-repeat="item in browse.data" value="{{item.package.component}}") {{item.package.component}}
         .card.card-sm.mb-3
             .card-body
-                label.form-label(style="font-family: 'MAIN-EB'") Namespace
-                input.form-control(type='text' placeholder='App Title' ng-model="app.data.package.namespace" autocomplete='off')
-
+                label.form-label(style="font-family: 'MAIN-EB'") Width X height
+                input.form-control(type='number' placeholder='300' ng-model="app.data.package.width" min="0" ng-keydown="event.save($event)")
+                div.text-center(style="font-size: 20px;") x
+                input.form-control(type='number' placeholder='400' ng-model="app.data.package.height" min="0" ng-keydown="event.save($event)")
         .card.card-sm.mb-3
             .card-body
-                label.form-label(style="font-family: 'MAIN-EB'") Category
-                select.form-select(ng-model="app.data.package.category")
-                    option(value="{{c.id}}" ng-repeat="c in extdata.categories") {{c.title}}
-
-        .card.card-sm.mb-3
-            .card-body
-                label.form-label(style="font-family: 'MAIN-EB'") Base Controller
-                select.form-select(ng-model="app.data.package.controller")
-                    option(value="") No Controller
-                    option(value="{{c}}" ng-repeat="c in extdata.controller") {{c}}
-            
-        .card.card-sm.mb-3
-            .card-body
-                label.form-label(style="font-family: 'MAIN-EB'") Base Theme
-                select.form-select(ng-model="app.data.package.theme")
-                    option(value="") No Theme
-                    option(value="{{c}}" ng-repeat="c in extdata.themes") {{c}}
-        
-        .card.card-sm.mb-3
-            .card-body
-                label.form-label(style="font-family: 'MAIN-EB'") View URI
-                input.form-control(type='text' placeholder='/board/notice/list' ng-model="app.data.package.viewuri" autocomplete='off')
-
-        .card.card-sm.mb-3
-            .card-body
-                label.form-label(style="font-family: 'MAIN-EB'") Script Type
-                select.form-select(ng-model="app.data.package.script_type")
-                    option(value="text/javascript") text/javascript
-                    option(value="text/babel") text/babel
+                .btn.btn-light(ng-click="modal.yarn()") package.json
 
     mixin editor_tab_browse()
         .input-icon.mb-3
@@ -54,31 +23,25 @@ div(style="width: 100%; height: 100%;")
                     path(stroke="none" d="M0 0h24v24H0z")
                     circle(cx="10" cy="10" r="7")
                     line(x1="21" y1="21" x2="15" y2="15")
-                
-        .root-tree.mb-1(ng-repeat="item in browse.data" class="{{item.package.id == app.id ? 'active' : ''}}" ng-click="browse.select(item)" ng-if="!item.hide")
+
+        .root-tree.mb-1(ng-repeat="item in browse.data" ng-class="{active: item.package.component==app.component}" ng-click="browse.select(item)" ng-if="!item.hide")
             .root-title
                 table
-                    tr 
+                    tr
                         td.w-1(style="vertical-align: top;")
                             i.fas.fa-code.mr-2
                         td(style="line-height: 1;")
-                            span {{item.package.title}}
-                            br
-                            span.namespace {{item.package.namespace}}
+                            span {{item.package.component}}
                         
-        a.root-tree.mb-1(href="/wiz/admin/workspace/apps/editor/new")
+        a.root-tree.mb-1(ng-click="modal.add_component()")
             .root-title.text-center.p-1.text-white
                 i.fas.fa-plus.mr-2
                 span Create New App
-
 
     mixin codearea(tab)
         div(style="overflow: hidden; height: 100%; width: 100%;" ng-click="app.tab.active('{$tab$}')" ng-if="app.editor.viewstate && layout.accessable_tab.includes('{$tab$}')" ng-cloak)
             .code-select.bg-dark.d-flex(style="margin-top: -2px;")
                 .btn.btn-square.btn-sm.p-2(ng-repeat="code in app.editor.code.list" ng-click="app.editor.code.change('{$tab$}', code.id)" ng-class="configuration.tab.{$tab$}_val == code.id ? 'btn-white' : 'btn-dark'") {{code.name}}
-
-                select.form-select.form-select-sm.m-1.ml-auto(style="width: 120px;" ng-model="app.data.package.properties[configuration.tab.{$tab$}_val]" ng-if="app.editor.codetypes[configuration.tab.{$tab$}_val].length > 0")
-                    option(ng-repeat="code in app.editor.codetypes[configuration.tab.{$tab$}_val]" value="{{code}}") {{code}}
                 select.form-select.form-select-sm.m-1.mr-0.ml-auto(ng-if="configuration.tab.{$tab$}_val == 'dic'" style="width: 60px;" ng-model="configuration.tab.{$tab$}_language")
                     option(ng-repeat="(key, value) in app.data.dic" value="{{key}}") {{key}}
                 .btn.btn-square.btn-dark.btn-sm.p-2(ng-if="configuration.tab.{$tab$}_val == 'dic'" ng-click="modal.add_language()")
@@ -89,9 +52,10 @@ div(style="width: 100%; height: 100%;")
                 div(ng-if="configuration.tab.{$tab$}_val == 'dic'" ng-model="app.data[configuration.tab.{$tab$}_val][configuration.tab.{$tab$}_language]" ui-monaco-opts="app.editor.properties['{$tab$}']" ui-monaco)
 
                 .code-preview(ng-if="configuration.tab.{$tab$}_val == 'preview'" style="max-width: none; width: 100%; height: 100%;")
-                    iframe.preview(style="height: 100%;" ng-show="app.preview.status")
+                    .preview-wrap
+                        iframe.preview(ng-show="app.preview.status")
                     table(ng-if="!app.preview.status" style="width: 100%; height: 100%;")
-                        tr 
+                        tr
                             td(style="text-align: center; vertical-align: middle;")
                                 .spinner-grow.text-dark(style="width: 120px; height: 120px;")
 
@@ -118,29 +82,12 @@ div(style="width: 100%; height: 100%;")
                             td
                                 h3.m-0.p-0(style="margin-top: 24px !important;") App Editor
 
-
-                select.form-control.text-white.mr-2(ng-model="extdata.branch" ng-change="app.branch.change(extdata.branch)" style="width: 120px;")
-                    option(ng-repeat="branch in extdata.branches" value="{{branch}}") {{branch}}
-                +editor_fastmenu
-
                 #navbar-menu.navbar.navbar-collapse.collapse
                     ul.navbar-nav
                     .navbar-nav.flex-row.order-md-last.mr-2(style="align-items: center;")
                         li.nav-item.p-0.pr-2
-                            - if IS_DEV
-                                a.nav-link.btn.btn-sm.text-dark.btn-white.btn-pill(href="?dev=false")
-                                    span.nav-link-title(style="font-size: 14px;") development
-                            - else
-                                a.nav-link.btn.btn-sm.text-dark.btn-white.btn-pill(href="?dev=true")
-                                    span.nav-link-title(style="font-size: 14px;") production
-                        
-                        li.nav-item.p-0.pr-2
                             a.nav-link.btn.btn-sm.text-dark.btn-white.btn-pill(ng-click="modal.keymaps()" style="font-size: 14px;")
                                 i.fas.fa-keyboard
-
-                        li.nav-item.p-0.pr-2
-                            a.nav-link.btn.btn-sm.text-dark.btn-white.btn-pill(ng-href="/wiz/admin/workspace/apps/editor/new" style="font-size: 14px;")
-                                i.fas.fa-plus
 
                         li.nav-item.p-0.pr-2
                             a.nav-link.btn.btn-sm.text-dark.btn-white.btn-pill(ng-click="import_file()" style="font-size: 14px;")
@@ -167,26 +114,11 @@ div(style="width: 100%; height: 100%;")
                                 span.nav-link-title.bold(style="font-size: 14px;")
                                     i.fas.fa-times
     
-    div(data-split-pane data-split-pane-properties="layout.viewstate.root")
-        .bg-dark(data-split-pane-component data-width="360px")
+    div(split-pane data-split-pane-properties="layout.viewstate.root")
+        .bg-dark(data-split-pane-component data-width="270px")
             .menu-layout.p-3
                 .btn-group.w-100.mb-3
-                    button.btn(type="button" ng-repeat="item in workspace.list" style="width: 50%;" class="{{workspace.active_workspace == item.id ? 'btn-white' : 'btn-dark'}}" ng-click="item.active()") {{item.name}}
-
-                .tree-container(ng-show="workspace.active_workspace == workspace.list[2].id")                    
-                    .root-tree.mb-1(ng-repeat="item in history.data" class="{{item.id == viewer.selected ? 'active' : ''}}" ng-click="history.change(item)")
-                        .root-title
-                            table
-                                tr 
-                                    td.w-1.pr-2.pt-2.pb-2(style="vertical-align: top; font-size: 18px;")
-                                        i.fas.fa-code-branch
-
-                                    td.pt-2.pb-2(style="line-height: 1;")
-                                        span {{ item.message ? item.message : 'no message' }}
-                                        br
-                                        span.namespace {{item.committer ? item.committer : item.author}} ·
-                                        span.namespace.text-muted.ml-1 {{item.datetime}} · {{ item.id.substring(0, 8) }} 
-
+                    button.btn(type="button" ng-repeat="item in workspace.list" style="width: 50%;" class="{{workspace.active_workspace == item.id ? 'disabled btn-white' : 'btn-dark'}}" ng-click="workspace.toggle($index)") {{item.name}}
 
                 .tree-container(ng-show="workspace.active_workspace == workspace.list[1].id")
                     +editor_tab_browse
@@ -216,75 +148,28 @@ div(style="width: 100%; height: 100%;")
                                     .layout-column
                                     .layout-column
                                     .layout-column
-                        br
-                        .layout-selector.p-2(ng-class="layout.active_layout == 4 ? 'active' : ''" ng-click="layout.change(4)")
-                            .layout-icon.rows-2
-                                .layout-row
-                                    .layout-column
-                                .layout-row
-                                    .layout-column
-
-                        .layout-selector.p-2(ng-class="layout.active_layout == 5 ? 'active' : ''" ng-click="layout.change(5)")
-                            .layout-icon.rows-2
-                                .layout-row
-                                    .layout-column
-                                    .layout-column
-                                .layout-row
-                                    .layout-column
-
-                        .layout-selector.p-2(ng-class="layout.active_layout == 6 ? 'active' : ''" ng-click="layout.change(6)")
-                            .layout-icon.rows-2
-                                .layout-row
-                                    .layout-column
-                                    .layout-column
-                                    .layout-column
-                                .layout-row
-                                    .layout-column
 
                     .hr.bg-white
-
         div(data-split-pane-divider data-width="0px")
-        
         #editor-area(data-split-pane-component)
-            div(style="width: 100%; height: 100%;" ng-if="workspace.active_workspace == 'history'")
-                .code-select.bg-dark.d-flex(style="margin-top: -2px;" ng-if="viewer.codes.length > 0")
-                    .btn.btn-square.btn-sm.p-2(ng-repeat="code in viewer.codes" ng-click="viewer.change(code)" ng-class="viewer.code == code ? 'btn-white' : 'btn-dark'" ng-if="code != 'preview'") {{code}}
-                    
-                div(style="height: {{ viewer.codes.length > 0 ? 'calc(100% - 36px);' : '100%' }}")
-                    div(ng-model="viewer.editor.data" ui-monaco-opts="viewer.editor.configuration" ui-monaco-diff)
-
-            div(data-split-pane data-split-pane-properties="layout.viewstate.horizonal" ng-show="workspace.active_workspace != 'history'")
-                div(data-split-pane-component data-height="100%")
-                    div(data-split-pane data-split-pane-properties="layout.viewstate.vertical_1_1")
-                        div(data-split-pane-component data-width="34%")
-                            +codearea('tab1')
+            div(data-split-pane data-split-pane-properties="layout.viewstate.vertical_1_1")
+                div(data-split-pane-component data-width="34%")
+                    +codearea('tab1')
+                div(data-split-pane-divider data-width="3px")
+                div(data-split-pane-component data-width="66%")
+                    div(data-split-pane data-split-pane-properties="layout.viewstate.vertical_1_2")
+                        div(data-split-pane-component data-width="50%")
+                            +codearea('tab2')
                         div(data-split-pane-divider data-width="3px")
-                        div(data-split-pane-component data-width="66%")
-                            div(data-split-pane data-split-pane-properties="layout.viewstate.vertical_1_2")
-                                div(data-split-pane-component data-width="50%")
-                                    +codearea('tab2')
-                                div(data-split-pane-divider data-width="3px")
-                                div(data-split-pane-component data-width="50%")
-                                    +codearea('tab3')
+                        div(data-split-pane-component data-width="50%")
+                            +codearea('tab3')
 
-                div(data-split-pane-divider data-height="3px")
-
-                div(data-split-pane-component data-height="0")
-                    div(style="overflow: hidden; height: 100%; width: 100%;" ng-click="app.tab.active('tab4')" ng-if="app.editor.viewstate" ng-cloak)
-                        .code-select.bg-dark.d-flex(style="margin-top: -2px;")
-                            a.btn.btn-square.btn-sm.p-2(href="" ng-click="event.app.tabchange('tab4', 'debug')" ng-class="configuration.tab.tab4_val == 'debug' ? 'btn-white' : 'btn-dark'") DEBUG
-                            a.btn.btn-square.btn-dark.btn-sm.p-2.ml-auto(href="" ng-if="configuration.tab.tab4_val == 'debug'" ng-click="socket.clear()") CLEAR
-                            button.btn.btn-square.btn-dark.btn-sm.p-2(ng-click="socket.link()" ng-if="configuration.tab.tab4_val == 'debug'")
-                                i.fas.fa-external-link-square-alt
-                        div(style="height: calc(100% - 36px);")
-                            .debug-messages(ng-if="configuration.tab.tab4_val == 'debug'" style="overflow: auto; max-width: none; width: 100%; height: 100%; background: #000; color: #fff; padding: 8px; line-height: 1;" ng-bind-html="trustAsHtml(socket.log)")
-            
     #modal-add-language.modal.fade(tabindex="-1")
         .modal-dialog.modal-sm(role='document')
             .modal-content
                 .modal-body
                     .modal-title Add Language
-                    .p-4 
+                    .p-4
                         input.form-control(type="text" placeholder="ko" ng-model="modal.add_language.lang" autocomplete='off')
                 .modal-footer
                     button.btn.btn-link.link-secondary.mr-auto(type='button' data-dismiss='modal') Cancel
@@ -310,54 +195,92 @@ div(style="width: 100%; height: 100%;")
                     button.btn.btn-link.link-secondary.mr-auto(type='button' data-dismiss='modal') Cancel
                     button.btn.btn-danger(type='button' ng-click="framework.delete()") Delete
 
+    #modal-add-component.modal.fade(tabindex="-1")
+        .modal-dialog.modal-sm(role='document')
+            .modal-content
+                .modal-body
+                    .modal-title Add Component
+                    .p-1
+                        input.form-control(type="text" placeholder="App" ng-enter="app.component.add()" ng-model="modal.add_component_name")
+                .modal-footer
+                    button.btn.btn-link.link-secondary.mr-auto(type='button' data-dismiss='modal') Cancel
+                    button.btn.btn-dark(type='button' ng-click="app.component.add()") Add
+
     #modal-keymaps.modal.fade(tabindex="-1")
         .modal-dialog(role='document' style="max-width: 720px;")
             .modal-content
                 .modal-header
                     .modal-title Shortcuts
                 .modal-body.m-0
-                    table.table.table-bordered.table-hover 
-                        thead 
+                    table.table.table-bordered.table-hover
+                        thead
                             th.text-center Shortcut
                             th.text-center Description
                         tbody
-                            tr 
+                            tr
                                 th.text-center
                                     button.btn.btn-sm.btn-dark Ctrl(CMD)
                                     i.fas.fa-plus.ml-1.mr-1
                                     button.btn.btn-sm.btn-dark S
                                 td.text-center Save
-                            tr 
+                            tr
                                 th.text-center
                                     button.btn.btn-sm.btn-dark Alt
                                     i.fas.fa-plus.ml-1.mr-1
                                     button.btn.btn-sm.btn-dark Z, X
                                 td.text-center move previous/next tab
-                             tr 
+                             tr
                                 th.text-center
                                     button.btn.btn-sm.btn-dark Alt
                                     i.fas.fa-plus.ml-1.mr-1
                                     button.btn.btn-sm.btn-dark A, S
                                 td.text-center move previous/next code view
-                            tr 
+                            tr
                                 th.text-center
                                     button.btn.btn-sm.btn-dark Alt
                                     i.fas.fa-plus.ml-1.mr-1
-                                    button.btn.btn-sm.btn-dark 1, 2, 3
-                                td.text-center Panel change (config/widget/framework)
-                            tr 
-                                th.text-center
-                                    button.btn.btn-sm.btn-dark Alt
-                                    i.fas.fa-plus.ml-1.mr-1
-                                    button.btn.btn-sm.btn-dark J, K
-                                td.text-center Previous/Next wiz component
-                            tr 
+                                    button.btn.btn-sm.btn-dark Tab
+                                td.text-center Panel change (App Config/Browser)
+                            tr
                                 th.text-center
                                     button.btn.btn-sm.btn-dark Alt
                                     i.fas.fa-plus.ml-1.mr-1
                                     button.btn.btn-sm.btn-dark F
                                 td.text-center Find Widgets (in widgets tab)
-                            
                 .modal-footer
                     button.btn.btn-link.link-secondary.ml-auto(type='button' data-dismiss='modal') Cancel
 
+    #modal-yarn.modal.fade(tabindex="-1")
+        .modal-dialog.modal-sm(role='document')
+            .modal-content
+                .modal-body
+                    .modal-title package.json
+                    a(href="https://www.npmjs.com/search?q=react" target="_blank") 패키지 검색
+                    .p-1(ng-repeat="(key, dep) in yarn.package")
+                        h3
+                            span {{key}}
+                        table.table.table-bordered.table-hover
+                            colgroup
+                                col
+                                col(style="width: 110px;")
+                                col(style="width: 100px;")
+                            thead
+                                th.text-center Package
+                                th.text-center Version
+                                th.text-center Action
+                            tbody
+                                tr(ng-repeat="pkg in dep")
+                                    th {{pkg[0]}}
+                                    td {{pkg[1]}}
+                                    td
+                                        span &#128316;
+                                        span(ng-click="yarn.remove(pkg[0], key)") &#10060;
+                .modal-footer
+                    .mr-auto
+                        label yarn add
+                        label
+                            input(type="checkbox" ng-model="yarn.add_dev")
+                            | -D
+                        input(type="text" placeholder="react" ng-model="yarn.package_name")
+                        button.btn.btn-secondary(ng-click="yarn.add()") execute
+                    button.btn.btn-dark(type='button' ng-click="modal.yarn('hide')") Close

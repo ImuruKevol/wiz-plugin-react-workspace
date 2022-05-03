@@ -2,60 +2,75 @@ import os
 import season
 import json
 
-wiz = framework.model("wiz")
+wiz = framework.model("wiz").instance()
+_data = wiz.model("react/storage")
 
 def search(framework):
-    rows = wiz.data.rows(mode='app')
+    component = framework.request.query("component", True)
+    data = _data.use("src")
+    rows = data.app.rows()
     framework.response.status(200, rows)
 
 def info(framework):
-    app_id = framework.request.segment.get(0, True)
-    info = wiz.data.get(app_id, mode='app')
-    if info is None:
+    component = framework.request.query("component", True)
+    data = _data.use("src")
+    res = data.app.get(component)
+    if res is None:
         framework.response.status(404)
-    framework.response.status(200, info)
+    framework.response.status(200, res)
 
 def update(framework):
-    info = framework.request.query("info", True)
-    info = json.loads(info)
-    wiz.data.update(info, mode='app')
+    component = framework.request.query("component", True)
+    _info = framework.request.query("info", True)
+    _info = json.loads(_info)
+    data = _data.use("src")
+    mode = framework.request.query("mode", None)
+    if mode == "new":
+        name = framework.request.query("name", True)
+        _info = data.__template__(name)
+    data.app.update(_info)
     framework.response.status(200)
 
 def delete(framework):
-    app_id = framework.request.segment.get(0, True)
-    wiz.data.delete(app_id, mode='app')
+    component = framework.request.query("component", True)
+    data.app.delete(component)
     framework.response.status(200)
 
-def history(framework):
-    commits = wiz.workspace.commits(branch=None, max_count=100)
-    framework.response.status(200, commits)
+def package_json(framework):
+    yarn = _data.use().yarn()
+    _info = yarn.info()
+    except_target = ["@babel/core", "@babel/cli", "@babel/preset-env", "@babel/plugin-transform-react-jsx", "@babel/preset-react", "esbuild", "esbuild-sass-plugin", "node-sass"]
+    # except_target = []
+    dependencies = {}
+    for pkg in _info["dependencies"]:
+        if pkg not in except_target:
+            dependencies[pkg] = _info["dependencies"][pkg]
+    devDependencies = {}
+    for pkg in _info["devDependencies"]:
+        if pkg not in except_target:
+            devDependencies[pkg] = _info["devDependencies"][pkg]
+    framework.response.status(200, {
+        "dependencies": dependencies,
+        "devDependencies": devDependencies,
+    })
 
-def diff(framework):
-    app_id = framework.request.segment.get(0, True)
-    commit = framework.request.segment.get(1, True)
-    filepath = f'apps/{app_id}'
+def package_add(framework):
+    package_name = framework.request.query("package_name", True)
+    add_dev = framework.request.query("add_dev", True)
+    yarn = _data.use().yarn()
+    targets = [package_name]
+    mode = "dev" if add_dev else "normal"
+    yarn.add(*targets, mode=mode)
+    framework.response.status(200)
 
-    def load_app_files(key):
-        try:
-            appfile = os.path.join(filepath, key)
-            text = wiz.workspace.file(appfile, branch=None, commit=commit)
-            return text
-        except:
-            return ""
-
-    appinfo = dict()
-    appinfo = os.path.join(filepath, 'app.json')
-    appinfo = wiz.workspace.file(appinfo, branch=None, commit=commit)
-    appinfo_txt = appinfo
-    appinfo = json.loads(appinfo)
-    appinfo['info'] = appinfo_txt
-    appinfo['code'] = dict()
-    appinfo['code']["controller"] = load_app_files("controller.py")
-    appinfo['code']["dic"] = load_app_files("dic.json")
-    appinfo['code']["api"] = load_app_files("api.py")
-    appinfo['code']["socketio"] = load_app_files("socketio.py")
-    appinfo['code']["html"] = load_app_files("html.dat")
-    appinfo['code']["js"] = load_app_files("js.dat")
-    appinfo['code']["css"] = load_app_files("css.dat")
-
-    framework.response.status(200, appinfo)
+def package_remove(framework):
+    package_name = framework.request.query("package_name", True)
+    except_target = ["@babel/core", "@babel/cli", "@babel/preset-env", "@babel/plugin-transform-react-jsx", "@babel/preset-react", "esbuild", "esbuild-sass-plugin", "node-sass"]
+    if package_name in except_target:
+        framework.response.status(500, f"Do not remove {package_name}")
+    add_dev = framework.request.query("add_dev", True)
+    yarn = _data.use().yarn()
+    targets = [package_name]
+    mode = "dev" if add_dev else "normal"
+    yarn.remove(*targets, mode=mode)
+    framework.response.status(200)

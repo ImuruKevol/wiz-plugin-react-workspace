@@ -1,42 +1,19 @@
 import time
 
-segment = wiz.request.segment
-path = segment.path.split("/")
-app_id = path[0]
-if app_id == "new":
-    if len(path) <= 2:
-        wiz.response.status(500, "if create new app, require app_name")
+segment = framework.request.segment
+# print(segment)
 
-component = "App"
-if len(path) > 1:
-    component = path[1]
+wiz = framework.model("wiz").instance()
+data = wiz.model("react/storage").use("src")
+rows = data.app.rows()
+if len(rows) == 0:
+    framework.response.redirect("/wiz/admin/react.workspace/apps/list")
 
-is_new = app_id == "new"
-if is_new:
-    app_id = wiz.model("util").randomstring(12) + str(int(time.time()))
-
-data = wiz.model("react/storage").use(app_id)
-
-tbl_app = wiz.model("mysql").use("app")
-kwargs["is_new"] = is_new
-if is_new:
-    _info = tbl_app.get(app_id=app_id)
-    if _info is None:
-        info = data.__template__(app_id, component)
-        data.app.update(info)
-        tbl_app.insert({
-            "app_id": app_id,
-        })
-    wiz.response.redirect(f"/app/develop/editor/{app_id}/{component}")
-
-apps = tbl_app.rows(app_id=app_id, orderby="updated desc limit 1")
-if len(apps) == 0:
-    wiz.response.redirect("/main")
-app = apps[0]
-info = data.app.get(app_id, component)
-if info is None:
-    wiz.response.redirect("/main")
+if "component" not in segment:
+    info = rows[0]
+    component = info['package']['component']
+else:
+    component = segment['component']
 
 kwargs['IS_DEV'] = True
-kwargs['APPUID'] = app_id
-kwargs["APPCOMPONENT"] = component
+kwargs["COMPONENT"] = component
