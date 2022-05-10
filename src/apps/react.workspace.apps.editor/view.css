@@ -1,13 +1,11 @@
-#react-workspace-apps-editor {
-	 height: 100vh;
-	 padding: 0;
-	 margin: 0;
-	 left: 0;
-	 right: 0;
-	 padding-top: 74px;
-	 max-width: none;
+.react-workspace-apps-editor {
+    padding: 0;
+    margin: 0;
+    left: 0;
+    right: 0;
+    max-width: none;
 }
- @media (min-width: 769px) {
+@media (min-width: 769px) {
 	 html, body {
 		 overflow: hidden;
 	}
@@ -17,16 +15,16 @@
 }
  .layout-icon {
 	 display: inline-table;
-	 width: 60px;
-	 height: 60px;
+	 width: 30px;
+	 height: 30px;
 	 border: 2px solid #fff;
 	 border-radius: 10%;
 }
  .layout-icon .layout-row, .layout-icon .layout-column {
-	 height: 60px;
+	 height: 30px;
 }
  .layout-icon.rows-2 .layout-row, .layout-icon.rows-2 .layout-column {
-	 height: 30px;
+	 height: 15px;
 }
  .layout-icon .layout-row {
 	 display: table-row;
@@ -157,20 +155,20 @@
 	 white-space: nowrap;
 	 cursor: pointer;
 }
- .tree-container .root-tree.active {
-	 background: rgba(255, 255, 255, .1);
-	 border-radius: 4px;
+.tree-container .root-tree.active {
+    background: rgba(255, 255, 255, .25);
+    border-radius: 4px;
 }
  .tree-container .sub .sub-title {
-	 overflow: hidden;
-	 text-overflow: ellipsis;
-	 margin-left: 16px;
-	 padding-left: 8px;
-	 margin-bottom: 4px;
-	 white-space: nowrap;
-	 cursor: pointer;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    margin-left: 16px;
+    padding-left: 8px;
+    margin-bottom: 4px;
+    white-space: nowrap;
+    cursor: pointer;
 }
- .tree-container .sub .sub-title.active {
+.tree-container .sub .sub-title.active {
 	 background: #fff !important;
 	 color: #6e7582;
 }
@@ -196,13 +194,9 @@
  .code-preview {
 	 text-align: center;
 }
- .code-preview .preview-wrap {
-	 display: inline-block;
-	 box-sizing: content-box;
-}
- .code-preview .preview-wrap iframe {
-	 width: 100%;
-	 height: 100%;
+.code-preview iframe {
+    width: 100%;
+    height: 100%;
 }
  #modal-yarn .modal-dialog {
 	 max-width: 700px;
@@ -226,3 +220,14 @@
 	 margin-left: 8px;
 }
  
+.card-package-json {
+    padding: 0;
+    
+    .card-body {
+        padding: 0;
+
+        .btn {
+            width: 100%;
+        }
+    }
+}

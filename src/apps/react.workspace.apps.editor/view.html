@@ -1,19 +1,20 @@
-#react-workspace-apps-editor.container(style="width: 100vw; height: 100vh;")
+.react-workspace-apps-editor.container(style="width: 100vw; height: 100vh;")
     mixin editor_tab_app()
         .card.card-sm.mb-3
             .card-body
-                label.form-label(style="font-family: 'MAIN-EB'") View
-                select.form-select(ng-model="app.data.package.viewcomponent")
-                    option(ng-repeat="item in browse.data" value="{{item.package.component}}") {{item.package.component}}
+                label.form-label(style="font-family: 'MAIN-EB'") Title
+                input.form-control(type="text" ng-model="app.data.package.title")
         .card.card-sm.mb-3
             .card-body
-                label.form-label(style="font-family: 'MAIN-EB'") Width X height
-                input.form-control(type='number' placeholder='300' ng-model="app.data.package.width" min="0" ng-keydown="event.save($event)")
-                div.text-center(style="font-size: 20px;") x
-                input.form-control(type='number' placeholder='400' ng-model="app.data.package.height" min="0" ng-keydown="event.save($event)")
-        .card.card-sm.mb-3
+                label.form-label(style="font-family: 'MAIN-EB'") View
+                select.form-select(ng-model="app.data.package.view")
+                    option(ng-repeat="item in browse.data" value="{{item.package.component}}") {{item.package.component}}
+        .card.card-sm.mb-3.card-package-json
             .card-body
                 .btn.btn-light(ng-click="modal.yarn()") package.json
+        .hr.bg-white.mt-3.mb-3
+        .tree-container
+            +editor_tab_browse
 
     mixin editor_tab_browse()
         .input-icon.mb-3
@@ -24,19 +25,20 @@
                     circle(cx="10" cy="10" r="7")
                     line(x1="21" y1="21" x2="15" y2="15")
 
-        .root-tree.mb-1(ng-repeat="item in browse.data" ng-class="{active: item.package.component==app.component}" ng-click="browse.select(item)" ng-if="!item.hide")
+        .root-tree.mb-1(ng-repeat="item in browse.data" ng-class="{active: item.package.component==app.current}" ng-click="browse.select(item)" ng-if="!item.hide")
             .root-title
                 table
                     tr
                         td.w-1(style="vertical-align: top;")
                             i.fas.fa-code.mr-2
                         td(style="line-height: 1;")
+                            span {{item.package.path.length==0?"":(item.package.path+"/")}}
                             span {{item.package.component}}
                         
         a.root-tree.mb-1(ng-click="modal.add_component()")
             .root-title.text-center.p-1.text-white
                 i.fas.fa-plus.mr-2
-                span Create New App
+                span Create New Component
 
     mixin codearea(tab)
         div(style="overflow: hidden; height: 100%; width: 100%;" ng-click="app.tab.active('{$tab$}')" ng-if="app.editor.viewstate && layout.accessable_tab.includes('{$tab$}')" ng-cloak)
@@ -52,8 +54,7 @@
                 div(ng-if="configuration.tab.{$tab$}_val == 'dic'" ng-model="app.data[configuration.tab.{$tab$}_val][configuration.tab.{$tab$}_language]" ui-monaco-opts="app.editor.properties['{$tab$}']" ui-monaco)
 
                 .code-preview(ng-if="configuration.tab.{$tab$}_val == 'preview'" style="max-width: none; width: 100%; height: 100%;")
-                    .preview-wrap
-                        iframe.preview(ng-show="app.preview.status")
+                    iframe.preview(ng-show="app.preview.status")
                     table(ng-if="!app.preview.status" style="width: 100%; height: 100%;")
                         tr
                             td(style="text-align: center; vertical-align: middle;")
@@ -86,6 +87,25 @@
                     ul.navbar-nav
                     .navbar-nav.flex-row.order-md-last.mr-2(style="align-items: center;")
                         li.nav-item.p-0.pr-2
+                            .text-center
+                                .layout-selector.p-2(ng-class="layout.active_layout == 1 ? 'active' : ''" ng-click="layout.change(1)")
+                                    .layout-icon
+                                        .layout-row
+                                            .layout-column
+
+                                .layout-selector.p-2(ng-class="layout.active_layout == 2 ? 'active' : ''" ng-click="layout.change(2)")
+                                    .layout-icon
+                                        .layout-row
+                                            .layout-column
+                                            .layout-column
+
+                                .layout-selector.p-2(ng-class="layout.active_layout == 3 ? 'active' : ''" ng-click="layout.change(3)")
+                                    .layout-icon
+                                        .layout-row
+                                            .layout-column
+                                            .layout-column
+                                            .layout-column
+                        li.nav-item.p-0.pr-2
                             a.nav-link.btn.btn-sm.text-dark.btn-white.btn-pill(ng-click="modal.keymaps()" style="font-size: 14px;")
                                 i.fas.fa-keyboard
 
@@ -99,7 +119,7 @@
 
                         li.nav-item.p-0.pr-2
                             a.nav-link.btn.btn-sm.text-dark.btn-white.btn-pill(ng-click="app.clean()")
-                                span.nav-link-title(style="font-size: 14px;") Clean
+                                span.nav-link-title(style="font-size: 14px;") ReBuild All
 
                         li.nav-item.p-0.pr-2
                             a.nav-link.btn.btn-sm.text-dark.btn-white.btn-pill(ng-click="modal.delete()")
@@ -110,46 +130,15 @@
                                 span.nav-link-title(style="font-size: 14px;") Save
 
                         li.nav-item.p-0
-                            a.nav-link.btn.btn-sm.text-dark.btn-white.btn-pill(ng-href='/wiz/admin/workspace/{{mode}}s/list')
+                            a.nav-link.btn.btn-sm.text-dark.btn-white.btn-pill(ng-href='/wiz/admin/react.workspace/{{mode}}s/list')
                                 span.nav-link-title.bold(style="font-size: 14px;")
                                     i.fas.fa-times
     
     div(split-pane data-split-pane-properties="layout.viewstate.root")
         .bg-dark(data-split-pane-component data-width="270px")
             .menu-layout.p-3
-                .btn-group.w-100.mb-3
-                    button.btn(type="button" ng-repeat="item in workspace.list" style="width: 50%;" class="{{workspace.active_workspace == item.id ? 'disabled btn-white' : 'btn-dark'}}" ng-click="workspace.toggle($index)") {{item.name}}
-
-                .tree-container(ng-show="workspace.active_workspace == workspace.list[1].id")
-                    +editor_tab_browse
-
-                div(ng-show="workspace.active_workspace == workspace.list[0].id")
-                    +editor_tab_app
-
-                    .hr.bg-white
-    
-                    h3.text-white Code Layout
-
-                    .text-center.mb-4
-                        .layout-selector.p-2(ng-class="layout.active_layout == 1 ? 'active' : ''" ng-click="layout.change(1)")
-                            .layout-icon
-                                .layout-row
-                                    .layout-column
-
-                        .layout-selector.p-2(ng-class="layout.active_layout == 2 ? 'active' : ''" ng-click="layout.change(2)")
-                            .layout-icon
-                                .layout-row
-                                    .layout-column
-                                    .layout-column
-
-                        .layout-selector.p-2(ng-class="layout.active_layout == 3 ? 'active' : ''" ng-click="layout.change(3)")
-                            .layout-icon
-                                .layout-row
-                                    .layout-column
-                                    .layout-column
-                                    .layout-column
-
-                    .hr.bg-white
+                +editor_tab_app
+                .hr.bg-white
         div(data-split-pane-divider data-width="0px")
         #editor-area(data-split-pane-component)
             div(data-split-pane data-split-pane-properties="layout.viewstate.vertical_1_1")
@@ -199,7 +188,7 @@
         .modal-dialog.modal-sm(role='document')
             .modal-content
                 .modal-body
-                    .modal-title Add Component
+                    .modal-title New Component
                     .p-1
                         input.form-control(type="text" placeholder="App" ng-enter="app.component.add()" ng-model="modal.add_component_name")
                 .modal-footer
@@ -227,20 +216,14 @@
                                 th.text-center
                                     button.btn.btn-sm.btn-dark Alt
                                     i.fas.fa-plus.ml-1.mr-1
-                                    button.btn.btn-sm.btn-dark Z, X
-                                td.text-center move previous/next tab
+                                    button.btn.btn-sm.btn-dark T
+                                td.text-center New Component
                              tr
                                 th.text-center
                                     button.btn.btn-sm.btn-dark Alt
                                     i.fas.fa-plus.ml-1.mr-1
                                     button.btn.btn-sm.btn-dark A, S
                                 td.text-center move previous/next code view
-                            tr
-                                th.text-center
-                                    button.btn.btn-sm.btn-dark Alt
-                                    i.fas.fa-plus.ml-1.mr-1
-                                    button.btn.btn-sm.btn-dark Tab
-                                td.text-center Panel change (App Config/Browser)
                             tr
                                 th.text-center
                                     button.btn.btn-sm.btn-dark Alt

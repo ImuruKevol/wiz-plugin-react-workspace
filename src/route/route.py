@@ -28,9 +28,6 @@ if segment is not None:
         framework.response.redirect(f"apps/editor/{component}")
 
     if segment.view == 'preview':
-        component = segment.component
-        framework.request.segment = season.stdClass()
-        framework.layout('core.theme.layout', navbar=False, monaco=False)
         framework.render("apps/preview/<component>", "react.workspace.apps.preview")
 
 framework.layout('core.theme.layout', navbar=True, monaco=True)

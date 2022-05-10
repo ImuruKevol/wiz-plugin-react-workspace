@@ -1,4 +1,7 @@
+wiz = framework.model("wiz").instance()
+
 def search(framework):
-    wiz = framework.model("wiz")
-    rows = wiz.data.rows(mode='app')
+    _data = wiz.model("react/storage")
+    data = _data.use("src")
+    rows = data.app.rows(onlyname=False)
     framework.response.status(200, rows)
